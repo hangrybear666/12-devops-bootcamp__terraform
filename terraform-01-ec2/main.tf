@@ -125,9 +125,43 @@ resource "aws_instance" "tf-test-server" {
   associate_public_ip_address = true
   key_name = aws_key_pair.ssh-key.key_name
 
-  user_data = file("payload/install-git-on-debian-ec2.sh")
+  # alternative is to use an existing key from AWS and use its respective private key .pem file to ssh into the server
+  # key_name ="hangrybear_dev-one"
+
+  # the problem with user data is no logging in terraform, it is also not possible to pass multiple files
+  # user_data = file("payload/install-git-on-debian-ec2.sh")
 
   user_data_replace_on_change = true
+  // WARNING: Provisioners are NOT recommended by terraform as it breaks the principle of idempotency
+  connection {
+    type = "ssh"
+    host = self.public_ip
+    user = "admin"
+    private_key = file(var.private_key_location)
+  }
+
+  provisioner "file" {
+    source = "payload/.env"
+    destination = "/home/admin/.env"
+  }
+
+  provisioner "file" {
+    source = "payload/install-git-on-debian-ec2.sh"
+    destination = "/home/admin/install-git-on-debian-ec2.sh"
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+        "sudo chmod u+x /home/admin/install-git-on-debian-ec2.sh",
+        "/bin/bash /home/admin/install-git-on-debian-ec2.sh"
+      ]
+  }
+
+  # local shell execution
+  # provisioner "local-exec" {
+  #   command = "echo ${self.public_ip} > output.txt"
+  # }
+
 
   tags = {
     Name: "${var.env_prefix}-server"
