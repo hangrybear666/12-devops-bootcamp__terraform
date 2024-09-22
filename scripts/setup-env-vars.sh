@@ -28,7 +28,11 @@ AWS_REGION=$AWS_REGION
 TF_VAR_EXAMPLE_VAR="example-env-var"
 " > terraform-01-ec2/.env
 echo "Created .env file with terraform secrets in" && echo "$(pwd)/terraform-01-ec2/" && echo "--------------------------------"
-cat terraform-01-ec2/.env
+
+# create terraform .env file for MODULARIZED ec2 project
+cp terraform-01-ec2/.env terraform-02-ec2-modularized/.env
+echo "Created .env file with terraform secrets in" && echo "$(pwd)/terraform-02-ec2-modularized/" && echo "--------------------------------"
+cat terraform-02-ec2-modularized/.env
 
 #create ec2 .env file deployed on remote instance
 touch terraform-01-ec2/payload/.env
@@ -43,4 +47,8 @@ AWS_REGION=$AWS_REGION
 AWS_OUTPUT_FORMAT=$AWS_OUTPUT_FORMAT
 " > terraform-01-ec2/payload/.env
 echo "Created .env file with ec2 secrets in" && echo "$(pwd)/terraform-01-ec2/payload/" && echo "--------------------------------"
-cat terraform-01-ec2/payload/.env
+
+#create ec2 .env file deployed on MODULARIZED remote instance
+cp terraform-01-ec2/payload/.env terraform-02-ec2-modularized/payload/.env
+echo "Created .env file with ec2 secrets in" && echo "$(pwd)/terraform-02-ec2-modularized/payload/" && echo "--------------------------------"
+cat terraform-02-ec2-modularized/payload/.env
