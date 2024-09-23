@@ -29,10 +29,14 @@ TF_VAR_EXAMPLE_VAR="example-env-var"
 " > terraform-01-ec2/.env
 echo "Created .env file with terraform secrets in" && echo "$(pwd)/terraform-01-ec2/" && echo "--------------------------------"
 
-# create terraform .env file for MODULARIZED ec2 project
+# copy terraform .env file for MODULARIZED ec2 project
 cp terraform-01-ec2/.env terraform-02-ec2-modularized/.env
 echo "Created .env file with terraform secrets in" && echo "$(pwd)/terraform-02-ec2-modularized/" && echo "--------------------------------"
-cat terraform-02-ec2-modularized/.env
+
+# copy terraform .env file for AWS EKS project
+cp terraform-01-ec2/.env terraform-03-aws-eks/.env
+echo "Created .env file with terraform secrets in" && echo "$(pwd)/terraform-03-aws-eks/" && echo "--------------------------------"
+cat terraform-03-aws-eks/.env
 
 #create ec2 .env file deployed on remote instance
 touch terraform-01-ec2/payload/.env

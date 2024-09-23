@@ -9,6 +9,7 @@ coming up
 <b><u>The basic course examples are:</u></b>
 1. Provision an EC2 instance with VPC, Internet Gateway, Route Table, Security Group, Subnet and initialization bash script
 2. (Modularized) Provision an EC2 instance with VPC, Internet Gateway, Route Table, Security Group, Subnet and initialization bash script
+3. Provide an EKS cluster /w 3 Nodes in a VPC with private & public subnets using predefined AWS EKS modules
 
 <b><u>The bonus projects are:</u></b>
 1. Provision a Linode VPS Server with Storage and Ingress to act as a docker in docker (dind) Jenkins Server for terraform CI/CD integration
@@ -99,8 +100,15 @@ terraform apply
 
 
 <details closed>
-<summary><b>3. wip</b></summary>
+<summary><b>3. Provide an EKS cluster /w 3 Nodes in a VPC with private & public subnets using predefined AWS EKS modules</b></summary>
 
+a.
+```bash
+cd terraform-03-aws-eks/
+source .env
+terraform init
+terraform apply
+```
 </details>
 
 -----
