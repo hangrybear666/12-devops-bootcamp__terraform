@@ -2,14 +2,13 @@
 coming up
 
 
-<b><u>The advanced exercise projects are:</u></b>
-*Work in Progress*
-1. Provision a Linode VPS
-
-<b><u>The basic course examples are:</u></b>
+<b><u>The course examples are:</u></b>
 1. Provision an EC2 instance with VPC, Internet Gateway, Route Table, Security Group, Subnet and initialization bash script
 2. (Modularized) Provision an EC2 instance with VPC, Internet Gateway, Route Table, Security Group, Subnet and initialization bash script
 3. Provide an EKS cluster /w 3 Nodes in a VPC with private & public subnets using predefined AWS EKS modules
+
+<b><u>The exercise projects are:</u></b>
+1. wip
 
 <b><u>The bonus projects are:</u></b>
 1. Provision a Linode VPS Server with Storage and Ingress to act as a docker in docker (dind) Jenkins Server for terraform CI/CD integration
@@ -36,18 +35,7 @@ scaffold the .env files with the following script and fill in your own details.
 cd scripts/ && ./setup-env-vars.sh
 ```
 
-
-## Usage (Exercises)
-
-<details closed>
-<summary><b>1. wip</b></summary>
-
-</details>
-
------
-
-
-## Usage (basic course examples)
+## Usage (course examples)
 
 <details closed>
 <summary><b>1. Provision an EC2 instance with VPC, Internet Gateway, Route Table, Security Group, Subnet and initialization bash script</b></summary>
@@ -109,6 +97,15 @@ source .env
 terraform init
 terraform apply
 ```
+</details>
+
+-----
+
+## Usage (Exercises)
+
+<details closed>
+<summary><b>1. wip</b></summary>
+
 </details>
 
 -----
