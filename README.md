@@ -6,6 +6,7 @@ coming up
 1. Provision an EC2 instance with VPC, Internet Gateway, Route Table, Security Group, Subnet and initialization bash script
 2. (Modularized) Provision an EC2 instance with VPC, Internet Gateway, Route Table, Security Group, Subnet and initialization bash script
 3. Provide an EKS cluster /w 3 Nodes in a VPC with private & public subnets using predefined AWS EKS modules
+4. CI-CD Integration of Terraform Provisioning as Stage in declarative Jenkins pipeline
 
 <b><u>The exercise projects are:</u></b>
 1. wip
@@ -40,9 +41,11 @@ cd scripts/ && ./setup-env-vars.sh
 <details closed>
 <summary><b>1. Provision an EC2 instance with VPC, Internet Gateway, Route Table, Security Group, Subnet and initialization bash script</b></summary>
 
-a. Create Public/Private Key pair so ec2-instance can add the public key to its ssh_config or use an existing key pair.
+#### a. Associate SSH Key to Instance
+Create Public/Private Key pair so ec2-instance can add the public key to its ssh_config or use an existing key pair.
 
-b. Create `terraform-01-ec2/terraform.tfvars` file and change any desired variables by overwriting the default values within `variables.tf`
+#### b. Change custom variables and apply template
+Create `terraform-01-ec2/terraform.tfvars` file and change any desired variables by overwriting the default values within `variables.tf`
 ```bash
 my_ips               = ["62.158.109.251/32", "3.79.46.109/32"]
 public_key_location  = "~/.ssh/id_ed25519.pub"
@@ -65,9 +68,11 @@ terraform apply
 <details closed>
 <summary><b>2. (Modularized) Provision an EC2 instance with VPC, Internet Gateway, Route Table, Security Group, Subnet and initialization bash script</b></summary>
 
-a. Create Public/Private Key pair so ec2-instance can add the public key to its ssh_config or use an existing key pair.
+#### a. Associate SSH Key to Instance
+Create Public/Private Key pair so ec2-instance can add the public key to its ssh_config or use an existing key pair.
 
-b. Create `terraform-02-ec2-modularized/terraform.tfvars` file and change any desired variables by overwriting the default values within `variables.tf`
+#### b. Provide custom variables
+Create `terraform-02-ec2-modularized/terraform.tfvars` file and change any desired variables by overwriting the default values within `variables.tf`
 ```bash
 my_ips               = ["62.158.109.251/32", "3.79.46.109/32"]
 public_key_location  = "~/.ssh/id_ed25519.pub"
@@ -90,13 +95,64 @@ terraform apply
 <details closed>
 <summary><b>3. Provide an EKS cluster /w 3 Nodes in a VPC with private & public subnets using predefined AWS EKS modules</b></summary>
 
-a.
+#### a. Apply the template
 ```bash
 cd terraform-03-aws-eks/
 source .env
 terraform init
 terraform apply
 ```
+
+#### b . Create IAM access entries so aws user can communicate with cluster
+
+**In AWS Management Console:**
+
+EKS -> Clusters -> tf-dev-eks-cluster -> IAM access entries -> Create access entry -> Policy name `AmazonEKSAdminPolicy` and `AmazonEKSClusterAdminPolicy`
+
+#### c . Update kubeconfig to connect to cluster and check functionality
+```bash
+aws eks update-kubeconfig --name tf-dev-eks-cluster --region eu-central-1
+kubectl get nodes
+kubectl apply -f k8s-manifests/nginx-deployment.yaml
+kubectl get svc
+# navigate to external ip of your cloud native loadbalancer to access nginx
+```
+
+</details>
+
+-----
+
+
+<details closed>
+<summary><b>4. CI-CD Integration of Terraform Provisioning as Stage in declarative Jenkins pipeline</b></summary>
+
+#### a. Configure Jenkins for AWS, Git, Docker Hub, and Kubernetes
+
+**Create Secrets**
+- Create Username:Password with the id `docker-hub-repo` containing your user and API Token as password
+- Create Username:Password with the id `git-creds` with either your username or jenkins and an API Token as password
+- Create Secret Text with the id `aws_access_key_id` with your AWS IAM Account's Access Key ID (or better a dedicated Jenkins IAM Account)
+- Create Secret Text with the id `aws_secret_access_key` with your AWS IAM Account's Secret Access Key (or better a dedicated Jenkins IAM Account)
+
+**Configure Jenkins Plugins**
+- Add Maven Plugin under Manage Jenkins -> Tools -> Maven and name it Maven.
+
+**Install aws cli in jenkins docker container**
+```bash
+ssh jenkins-runner@172.105.75.118
+docker exec -u root -it jenkins-dind bash
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+unzip awscliv2.zip
+./aws/install
+exit
+```
+
+#### b. Create Jenkins Pipeline with this repository as source and Jenkinsfile located in terraform-04-ci-cd-jenkins-provisioning/java-app/Jenkinsfile
+
+- Replace the environment variables in `terraform-04-ci-cd-jenkins-provisioning/java-app/Jenkinsfile` with your own repositories (Docker Hub / ECR)
+
+#### c. 
+
 </details>
 
 -----

@@ -1,0 +1,122 @@
+#!/user/bin/env groovy
+
+library identifier: '12-devops-bootcamp__terraform.git@main', retriever: modernSCM(
+    scm: [$class: 'GitSCMSource',
+    credentialsId: 'git-creds',
+    remote: 'https://github.com/hangrybear666/12-devops-bootcamp__terraform.git',
+    traits: [gitBranchDiscovery()]],
+    libraryPath: 'terraform-04-ci-cd-jenkins-provisioning/jenkins-shared-library/')
+
+pipeline {
+    agent any
+    tools {
+        maven 'Maven'
+    }
+    environment {
+        DOCKER_HUB_REPO_URL='hangrybear666/personal-imgs'
+        AWS_ECR_REPO_URL='010928217051.dkr.ecr.eu-central-1.amazonaws.com/k8s-imgs'
+        AWS_IAM_AUTH_IMAGE_NAME='aws-iam-auth-k8s-0'
+        AWS_IAM_AUTH_IMAGE_TAG="${env.AWS_IAM_AUTH_IMAGE_NAME}-${env.BUILD_ID}"
+    }
+    stages {
+
+        stage('Increment Java App Version') {
+            steps {
+                dir("terraform-04-ci-cd-jenkins-provisioning/java-app") {
+                    script {
+                        echo 'incrementing app version...'
+                        sh 'mvn build-helper:parse-version versions:set \
+                            -DnewVersion=\\\${parsedVersion.majorVersion}.\\\${parsedVersion.minorVersion}.\\\${parsedVersion.nextIncrementalVersion} \
+                            versions:commit'
+                        def matcher = readFile('pom.xml') =~ '<version>(.+)</version>'
+                        def version = matcher[0][1]
+                        env.VERSION_NUM = "$version-$BUILD_NUMBER"
+                    }
+                }
+            }
+        }
+        stage('Build Java App JAR') {
+            steps {
+                dir("terraform-04-ci-cd-jenkins-provisioning/java-app") {
+                    script {
+                        // using jenkins shared library groovy scripts in /jenkins-shared-library/vars
+                        buildJar()
+                    }
+                }
+            }
+        }
+        stage('Build & Push Java App Image to ECR') {
+            environment {
+                AWS_ACCESS_KEY_ID = credentials('aws_access_key_id')
+                AWS_SECRET_ACCESS_KEY = credentials('aws_secret_access_key')
+            }
+            steps {
+                dir("terraform-04-ci-cd-jenkins-provisioning/java-app") {
+                    script {
+                        sh """
+                        aws configure set aws_access_key_id ${AWS_ACCESS_KEY_ID}
+                        aws configure set aws_secret_access_key ${AWS_SECRET_ACCESS_KEY}
+                        aws configure set region eu-central-1
+                        aws ecr get-login-password --region eu-central-1 | docker login --username AWS --password-stdin ${env.AWS_ECR_REPO_URL}
+                        docker build -t java-app-${env.VERSION_NUM} .
+                        docker tag java-app-${env.VERSION_NUM} ${env.AWS_ECR_REPO_URL}:java-app-${env.VERSION_NUM}
+                        docker push ${env.AWS_ECR_REPO_URL}:java-app-${env.VERSION_NUM}
+                        """
+                    }
+                }
+            }
+        }
+        stage('Provision AWS EC2') {
+            environment {
+                AWS_ACCESS_KEY_ID = credentials('aws_access_key_id')
+                AWS_SECRET_ACCESS_KEY = credentials('aws_secret_access_key')
+                TF_VAR_env_prefix = 'test'
+            }
+            steps {
+                script {
+                    dir('terraform-04-ci-cd-jenkins-provisioning') {
+                        script {
+                            echo 'Provisioning with Terraform...'
+                        }
+                    }
+                }
+            }
+        }
+        stage('Deploy to AWS EC2') {
+            environment {
+                DOCKER_CREDS = credentials('docker-hub-repo')
+            }
+            steps {
+                script {
+                    echo "waiting for EC2 server to initialize"
+                    // sleep(time: 90, unit: "SECONDS")
+                    // echo 'deploying docker image to EC2...'
+                    // echo "${EC2_PUBLIC_IP}"
+                    // def shellCmd = "bash ./server-cmds.sh ${IMAGE_NAME} ${DOCKER_CREDS_USR} ${DOCKER_CREDS_PSW}"
+                    // def ec2Instance = "ec2-user@${EC2_PUBLIC_IP}"
+                    // sshagent(['server-ssh-key']) {
+                    //     sh "scp -o StrictHostKeyChecking=no server-cmds.sh ${ec2Instance}:/home/ec2-user"
+                    //     sh "scp -o StrictHostKeyChecking=no docker-compose.yaml ${ec2Instance}:/home/ec2-user"
+                    //     sh "ssh -o StrictHostKeyChecking=no ${ec2Instance} ${shellCmd}"
+                    // }
+                }
+            }
+        }
+        // stage('Commit version update'){
+        //     steps {
+        //         script {
+        //             withCredentials([usernamePassword(credentialsId: 'git-creds', passwordVariable: 'PASS', usernameVariable: 'USER')]){
+        //                 sh 'git config --global user.email "jenkins@example.com"'
+        //                 sh 'git config --global user.name "jenkins"'
+
+        //                 sh "git remote set-url origin https://${USER}:${PASS}@github.com/hangrybear666/12-devops-bootcamp__terraform.git"
+        //                 sh 'git add java-app/pom.xml'
+        //                 sh 'git commit -m "ci-cd bot: java-app version bump"'
+        //                 sh 'git push origin HEAD:main'
+        //             }
+        //         }
+        //     }
+        // }
+    }
+}
+
