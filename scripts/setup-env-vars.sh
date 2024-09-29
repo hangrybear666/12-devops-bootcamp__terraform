@@ -36,7 +36,12 @@ echo "Created .env file with terraform secrets in" && echo "$(pwd)/terraform-02-
 # copy terraform .env file for AWS EKS project
 cp terraform-01-ec2/.env terraform-03-aws-eks/.env
 echo "Created .env file with terraform secrets in" && echo "$(pwd)/terraform-03-aws-eks/" && echo "--------------------------------"
-cat terraform-03-aws-eks/.env
+
+# copy terraform .env file for CI CD Jenkins Integration
+cp terraform-01-ec2/.env terraform-04-ci-cd-jenkins-provisioning/.env
+echo "Created .env file with terraform secrets in" && echo "$(pwd)/terraform-04-ci-cd-jenkins-provisioning/" && echo "--------------------------------"
+cat terraform-04-ci-cd-jenkins-provisioning/.env
+
 
 #create ec2 .env file deployed on remote instance
 touch terraform-01-ec2/payload/.env

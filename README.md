@@ -6,7 +6,7 @@ coming up
 1. Provision an EC2 instance with VPC, Internet Gateway, Route Table, Security Group, Subnet and initialization bash script
 2. (Modularized) Provision an EC2 instance with VPC, Internet Gateway, Route Table, Security Group, Subnet and initialization bash script
 3. Provide an EKS cluster /w 3 Nodes in a VPC with private & public subnets using predefined AWS EKS modules
-4. CI-CD Integration of Terraform Provisioning as Stage in declarative Jenkins pipeline
+4. CI-CD Integration of Terraform Provisioning of EC2 as deployment server as Stage in declarative Jenkins pipeline
 
 <b><u>The exercise projects are:</u></b>
 1. wip
@@ -124,7 +124,7 @@ kubectl get svc
 
 
 <details closed>
-<summary><b>4. CI-CD Integration of Terraform Provisioning as Stage in declarative Jenkins pipeline</b></summary>
+<summary><b>4. CI-CD Integration of Terraform Provisioning of EC2 as deployment server as Stage in declarative Jenkins pipeline</b></summary>
 
 #### a. Configure Jenkins for AWS, Git, Docker Hub, and Kubernetes
 
@@ -147,11 +147,33 @@ unzip awscliv2.zip
 exit
 ```
 
-#### b. Create Jenkins Pipeline with this repository as source and Jenkinsfile located in terraform-04-ci-cd-jenkins-provisioning/java-app/Jenkinsfile
+**Install terraform in jenkins docker container**
+```bash
+ssh jenkins-runner@172.105.75.118
+docker exec -u root -it jenkins-dind bash
+apt update && apt install -y wget
+wget -O- https://apt.releases.hashicorp.com/gpg | gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
+echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/hashicorp.list
+apt update && apt install -y terraform
+```
 
-- Replace the environment variables in `terraform-04-ci-cd-jenkins-provisioning/java-app/Jenkinsfile` with your own repositories (Docker Hub / ECR)
+#### b. Update terraform tfvars with your own data and add your ssh key to the jenkins credentials
 
-#### c. 
+- Update your whitelisted `my_ips` and the `jenkins_ip` in `terraform-04-ci-cd-jenkins-provisioning/terraform.tfvars`
+- Update your existing `ssh_key_name` from aws EC2 Dashboard to use for ssh access to ec2 in `terraform-04-ci-cd-jenkins-provisioning/terraform.tfvars`
+- Create SSH Username:Private Key with the id `ssh-tf-ec2` and provide the aws console private key from prior step as secret. User is `ec2-user`
+
+#### c. Create Jenkins Pipeline with this repository as source and Jenkinsfile located in terraform-04-ci-cd-jenkins-provisioning/java-app/Jenkinsfile
+
+- Replace the environment variable `AWS_ECR_REPO_URL` in `terraform-04-ci-cd-jenkins-provisioning/java-app/Jenkinsfile` with your own repository url
+
+#### d. Create S3 bucket to store terraform state to synchronize the state to remote storage for other team members
+
+- Create S3 bucket in AWS console  in the same region written in `provider.tf` named `tf-dev-bucket-ec2`. If you name it differently, override `bucket =` in `terraform-04-ci-cd-jenkins-provisioning/provider.tf`
+- Amazon S3 -> Buckets -> Create bucket -> "tf-dev-bucket-ec2" -> ACLs disabled (recommended) -> Block all public access -> Bucket Versioning (Disable) -> Server-side encryption with Amazon S3 managed keys (SSE-S3) -> Bucket Key (Disable)
+- If your region is not eu-central-1 then change it in `payload/ec2-run-ecr-image.sh`
+
+#### e. 
 
 </details>
 
