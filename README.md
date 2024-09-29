@@ -6,13 +6,12 @@ coming up
 1. Provision an EC2 instance with VPC, Internet Gateway, Route Table, Security Group, Subnet and initialization bash script
 2. (Modularized) Provision an EC2 instance with VPC, Internet Gateway, Route Table, Security Group, Subnet and initialization bash script
 3. Provide an EKS cluster /w 3 Nodes in a VPC with private & public subnets using predefined AWS EKS modules
-4. CI-CD Integration of Terraform Provisioning of EC2 as deployment server as Stage in declarative Jenkins pipeline
-
-<b><u>The exercise projects are:</u></b>
-1. wip
+4. CI-CD Terraform Integration provisioning an EC2 instance as deployment server & deploying payload in declarative Jenkins pipeline
 
 <b><u>The bonus projects are:</u></b>
 1. Provision a Linode VPS Server with Storage and Ingress to act as a docker in docker (dind) Jenkins Server for terraform CI/CD integration
+
+<b><u>The exercise projects are:</u></b>
 
 ## Setup
 
@@ -124,9 +123,9 @@ kubectl get svc
 
 
 <details closed>
-<summary><b>4. CI-CD Integration of Terraform Provisioning of EC2 as deployment server as Stage in declarative Jenkins pipeline</b></summary>
+<summary><b>4. CI-CD Terraform Integration provisioning an EC2 instance as deployment server & deploying payload in declarative Jenkins pipeline</b></summary>
 
-#### a. Configure Jenkins for AWS, Git, Docker Hub, and Kubernetes
+#### a. Configure Jenkins for AWS, Git, Docker Hub, SSH
 
 **Create Secrets**
 - Create Username:Password with the id `docker-hub-repo` containing your user and API Token as password
@@ -172,20 +171,18 @@ apt update && apt install -y terraform
 
 #### d. Run the pipeline with your own custom parameters to whitelist your IP address and provide your aws key-pair name for ssh access
 
+*Note:* Since custom parameters aren't initialized on first run, you should cancel the first run, until you see the "Build with Parameters" Option in Jenkins.
 
+**IMPORTANT** To debug and interact with terraform locally e.g. to destroy resources, simply provide the necessary variables in `terraform.tfvars` instead of running the pipeline
+```bash
+#terraform.tfvars
+my_ip               = "xxx.xxx.xxx.xxx/32"
+jenkins_ip           = "xxx.xxx.xxx.xxx/32"
+ssh_key_name         = "tf-ci-cd-test"
+```
 </details>
 
 -----
-
-## Usage (Exercises)
-
-<details closed>
-<summary><b>1. wip</b></summary>
-
-</details>
-
------
-
 
 ## Usage (bonus projects)
 
@@ -233,6 +230,15 @@ e. Retrieve the initial jenkins password from the linode instance and replace th
 ssh jenkins-runner@172.105.75.118 \
 docker exec jenkins-dind cat /var/jenkins_home/secrets/initialAdminPassword
 ```
+
+</details>
+
+-----
+
+## Usage (Exercises)
+
+<details closed>
+<summary><b></b></summary>
 
 </details>
 

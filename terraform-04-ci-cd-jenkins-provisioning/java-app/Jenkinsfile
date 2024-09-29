@@ -14,7 +14,7 @@ pipeline {
     }
     parameters {
         text(name: 'MY_IP_WHITELIST', defaultValue: '62.158.109.251/32', description: 'IP addresses allowed to SSH into ec2.')
-        text(name: 'SSH_KEY_NAME', defaultValue: 'tf-ci-cd-test', description: 'Enter the name of your aws key pair to ssh into your ec2.')
+        string(name: 'SSH_KEY_NAME', defaultValue: 'tf-ci-cd-test', description: 'Enter the name of your aws key pair to ssh into your ec2.')
     }
     environment {
         JENKINS_IP = "172.105.75.118"
@@ -101,7 +101,7 @@ pipeline {
                 dir('terraform-04-ci-cd-jenkins-provisioning') {
                     script {
                         echo "waiting for EC2 server to initialize"
-                        sleep(time: 60, unit: "SECONDS")
+                        sleep(time: 90, unit: "SECONDS")
                         echo 'deploying ECR hosted docker image via bash payload script to EC2...'
                         def shellCmd = "bash ./ec2-run-ecr-image.sh ${AWS_ACCESS_KEY_ID} ${AWS_SECRET_ACCESS_KEY} ${env.AWS_ECR_REPO_URL} ${env.AWS_ECR_REPO_URL}:java-app-${env.VERSION_NUM}"
                         def ec2Instance = "ec2-user@${EC2_PUBLIC_IP}"
@@ -113,21 +113,21 @@ pipeline {
                 }
             }
         }
-        // stage('Commit version update'){
-        //     steps {
-        //         script {
-        //             withCredentials([usernamePassword(credentialsId: 'git-creds', passwordVariable: 'PASS', usernameVariable: 'USER')]){
-        //                 sh 'git config --global user.email "jenkins@example.com"'
-        //                 sh 'git config --global user.name "jenkins"'
+        stage('Commit version update'){
+            steps {
+                script {
+                    withCredentials([usernamePassword(credentialsId: 'git-creds', passwordVariable: 'PASS', usernameVariable: 'USER')]){
+                        sh 'git config --global user.email "jenkins@example.com"'
+                        sh 'git config --global user.name "jenkins"'
 
-        //                 sh "git remote set-url origin https://${USER}:${PASS}@github.com/hangrybear666/12-devops-bootcamp__terraform.git"
-        //                 sh 'git add java-app/pom.xml'
-        //                 sh 'git commit -m "ci-cd bot: java-app version bump"'
-        //                 sh 'git push origin HEAD:main'
-        //             }
-        //         }
-        //     }
-        // }
+                        sh "git remote set-url origin https://${USER}:${PASS}@github.com/hangrybear666/12-devops-bootcamp__terraform.git"
+                        sh 'git add terraform-04-ci-cd-jenkins-provisioning/java-app/pom.xml'
+                        sh 'git commit -m "ci-cd bot: java-app version bump"'
+                        sh 'git push origin HEAD:main'
+                    }
+                }
+            }
+        }
     }
 }
 

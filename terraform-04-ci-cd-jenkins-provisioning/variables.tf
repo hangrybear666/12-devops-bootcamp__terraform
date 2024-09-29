@@ -36,7 +36,7 @@ variable jenkins_ip {
 variable instance_type {
   description = "The EC2 instance type to use"
   type        = string
-  default = "t2.micro"
+  default = "t2.small"
 }
 variable ssh_key_name {
   description = "name of existing keypair in aws console"
