@@ -1,5 +1,5 @@
 # 12-devops-bootcamp__terraform
-coming up
+Collection of Terraform configurations & modules for EC2 provisioning, EKS cluster setup, CI/CD integration with Jenkins & Linode VPS provisioning with Docker-in-Docker Jenkins. 
 
 
 <b><u>The course examples are:</u></b>
@@ -46,7 +46,7 @@ Create Public/Private Key pair so ec2-instance can add the public key to its ssh
 #### b. Change custom variables and apply template
 Create `terraform-01-ec2/terraform.tfvars` file and change any desired variables by overwriting the default values within `variables.tf`
 ```bash
-my_ips               = ["62.158.109.251/32", "3.79.46.109/32"]
+my_ips               = ["62.xxx.xxx.251/32", "3.xxx.xxx.109/32"]
 public_key_location  = "~/.ssh/id_ed25519.pub"
 private_key_location = "~/.ssh/id_ed25519"
 ```
@@ -73,7 +73,7 @@ Create Public/Private Key pair so ec2-instance can add the public key to its ssh
 #### b. Provide custom variables
 Create `terraform-02-ec2-modularized/terraform.tfvars` file and change any desired variables by overwriting the default values within `variables.tf`
 ```bash
-my_ips               = ["62.158.109.251/32", "3.79.46.109/32"]
+my_ips               = ["62.xxx.xxx.251/32", "3.xxx.xxx.109/32"]
 public_key_location  = "~/.ssh/id_ed25519.pub"
 private_key_location = "~/.ssh/id_ed25519"
 ```
@@ -198,7 +198,7 @@ b. Create Public/Private Key pair so ec2-instance can add the public key to its 
 
 c. Create `bonus-01-linode-jenkins/terraform.tfvars` file and change any desired variables by overwriting the default values within `variables.tf`
 ```bash
-my_ips               = ["62.158.109.251/32", "3.79.46.109/32"]
+my_ips               = ["62.xxx.xxx.251/32", "3.xxx.xxx.109/32"]
 public_key_content   = "ssh-ed25519 xxxxxxxxxxxxxxxxxx example.user@protonmail.com"
 private_key_location = "~/.ssh/id_ed25519"
 instance_type        = "g6-standard-1" # standard is the bigger version with 2 virtual cpus
