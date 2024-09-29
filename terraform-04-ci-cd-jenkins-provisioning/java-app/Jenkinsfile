@@ -12,7 +12,12 @@ pipeline {
     tools {
         maven 'Maven'
     }
+    parameters {
+        text(name: 'MY_IP_WHITELIST', defaultValue: '62.158.109.251/32', description: 'IP addresses allowed to SSH into ec2.')
+        text(name: 'SSH_KEY_NAME', defaultValue: 'tf-ci-cd-test', description: 'Enter the name of your aws key pair to ssh into your ec2.')
+    }
     environment {
+        JENKINS_IP = "172.105.75.118"
         AWS_ECR_REPO_URL='010928217051.dkr.ecr.eu-central-1.amazonaws.com/k8s-imgs'
     }
     stages {
@@ -68,12 +73,15 @@ pipeline {
                 AWS_ACCESS_KEY_ID = credentials('aws_access_key_id')
                 AWS_SECRET_ACCESS_KEY = credentials('aws_secret_access_key')
                 TF_VAR_env_prefix = 'tf-jenkins'
+                TF_VAR_my_ip = "${MY_IP_WHITELIST}"
+                TF_VAR_jenkins_ip = "${JENKINS_IP}/32"
+                TF_VAR_ssh_key_name = "${SSH_KEY_NAME}"
             }
             steps {
                 dir('terraform-04-ci-cd-jenkins-provisioning') {
                     script {
                         echo 'Provisioning with Terraform...'
-                        sh "terraform init -migrate-state"
+                        sh "terraform init"
                         sh "terraform apply --auto-approve"
                         EC2_PUBLIC_IP = sh(
                         script: "terraform output ec2-public_ip",

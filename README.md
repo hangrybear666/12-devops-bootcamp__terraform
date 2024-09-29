@@ -133,9 +133,11 @@ kubectl get svc
 - Create Username:Password with the id `git-creds` with either your username or jenkins and an API Token as password
 - Create Secret Text with the id `aws_access_key_id` with your AWS IAM Account's Access Key ID (or better a dedicated Jenkins IAM Account)
 - Create Secret Text with the id `aws_secret_access_key` with your AWS IAM Account's Secret Access Key (or better a dedicated Jenkins IAM Account)
+- Create SSH Username:Private Key with the id `ssh-tf-ec2` and provide the aws console private key from prior step as secret. User is `ec2-user`
 
 **Configure Jenkins Plugins**
 - Add Maven Plugin under Manage Jenkins -> Tools -> Maven and name it Maven.
+- Install SSH Agent Plugin under Manage Jenkins -> Plugins -> Available Plugins
 
 **Install aws cli in jenkins docker container**
 ```bash
@@ -157,23 +159,19 @@ echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://
 apt update && apt install -y terraform
 ```
 
-#### b. Update terraform tfvars with your own data and add your ssh key to the jenkins credentials
-
-- Update your whitelisted `my_ips` and the `jenkins_ip` in `terraform-04-ci-cd-jenkins-provisioning/terraform.tfvars`
-- Update your existing `ssh_key_name` from aws EC2 Dashboard to use for ssh access to ec2 in `terraform-04-ci-cd-jenkins-provisioning/terraform.tfvars`
-- Create SSH Username:Private Key with the id `ssh-tf-ec2` and provide the aws console private key from prior step as secret. User is `ec2-user`
-
-#### c. Create Jenkins Pipeline with this repository as source and Jenkinsfile located in terraform-04-ci-cd-jenkins-provisioning/java-app/Jenkinsfile
-
-- Replace the environment variable `AWS_ECR_REPO_URL` in `terraform-04-ci-cd-jenkins-provisioning/java-app/Jenkinsfile` with your own repository url
-
-#### d. Create S3 bucket to store terraform state to synchronize the state to remote storage for other team members
+#### b. Create S3 bucket to store terraform state to synchronize the state to remote storage for other team members
 
 - Create S3 bucket in AWS console  in the same region written in `provider.tf` named `tf-dev-bucket-ec2`. If you name it differently, override `bucket =` in `terraform-04-ci-cd-jenkins-provisioning/provider.tf`
 - Amazon S3 -> Buckets -> Create bucket -> "tf-dev-bucket-ec2" -> ACLs disabled (recommended) -> Block all public access -> Bucket Versioning (Disable) -> Server-side encryption with Amazon S3 managed keys (SSE-S3) -> Bucket Key (Disable)
-- If your region is not eu-central-1 then change it in `payload/ec2-run-ecr-image.sh`
 
-#### e. 
+#### c. Create Jenkins Pipeline with this repository as source and Jenkinsfile located in terraform-04-ci-cd-jenkins-provisioning/java-app/Jenkinsfile
+
+- If your region is not eu-central-1 then change it in `payload/ec2-run-ecr-image.sh`
+- Replace the environment variable `AWS_ECR_REPO_URL` in `terraform-04-ci-cd-jenkins-provisioning/java-app/Jenkinsfile` with your own repository url
+- Replace the environment variable `JENKINS_IP` in `terraform-04-ci-cd-jenkins-provisioning/java-app/Jenkinsfile` with your own Jenkins Server IP
+
+#### d. Run the pipeline with your own custom parameters to whitelist your IP address and provide your aws key-pair name for ssh access
+
 
 </details>
 

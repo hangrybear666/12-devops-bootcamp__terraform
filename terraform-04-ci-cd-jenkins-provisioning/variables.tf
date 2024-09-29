@@ -23,15 +23,15 @@ variable env_prefix {
   type        = string
   default = "dev"
 }
-variable my_ips {
+variable my_ip {
   description = "Your public IP for SSH access"
-  type        = list(string)
-  default     = ["0.0.0.0/0"] # Update to your IP (e.g. "203.0.113.0/32") for security
+  type        = string
+  default     = "0.0.0.0/0" # Update to your IP (e.g. "203.0.113.0/32") for security
 }
 variable jenkins_ip {
   description = "IP address of your jenkins server"
   type        = string
-  default = "172.105.75.118/32" # Update to your IP (e.g. "203.0.113.0/32") for security
+  default = "" # Update to your IP (e.g. "203.0.113.0/32") for security
 }
 variable instance_type {
   description = "The EC2 instance type to use"
