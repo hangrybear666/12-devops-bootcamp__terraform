@@ -10,6 +10,8 @@ Collection of Terraform configurations & modules for EC2 provisioning, EKS clust
 
 <b><u>The bonus projects are:</u></b>
 1. Provision a Linode VPS Server with Storage and Ingress to act as a docker in docker (dind) Jenkins Server for terraform CI/CD integration
+2. Provision 1-n generic Linode VPS Debian 12 Servers with a blank slate to further configure with e.g. Ansible (remote S3 state backend)
+3. Provision a global S3 bucket used as terraform state backend including a lock mechanism and versioning
 
 <b><u>The exercise projects are:</u></b>
 
@@ -190,14 +192,14 @@ ssh_key_name         = "tf-ci-cd-test"
 <details closed>
 <summary><b>1. Provision a Linode VPS Server with Storage and Ingress to act as a docker in docker (dind) Jenkins Server for terraform CI/CD integration</b></summary>
 
-a. Setup a Linode Account and create an API TOKEN, then run script to generate `.env` file.
+#### a. Setup a Linode Account and create an API TOKEN, then run script to generate `.env` file.
 ```bash
 cd scripts/ && ./setup-linode.sh && cd ..
 ```
 
-b. Create Public/Private Key pair so ec2-instance can add the public key to its ssh_config or use an existing key pair.
+#### b. Create Public/Private Key pair so linode vps can add the public key to its authorized_keys
 
-c. Create `bonus-01-linode-jenkins/terraform.tfvars` file and change any desired variables by overwriting the default values within `variables.tf`
+#### c. Create `bonus-01-linode-jenkins/terraform.tfvars` file and change any desired variables by overwriting the default values within `variables.tf`
 ```bash
 my_ips               = ["62.xxx.xxx.251/32", "3.xxx.xxx.109/32"]
 public_key_content   = "ssh-ed25519 xxxxxxxxxxxxxxxxxx example.user@protonmail.com"
@@ -205,7 +207,7 @@ private_key_location = "~/.ssh/id_ed25519"
 instance_type        = "g6-standard-1" # standard is the bigger version with 2 virtual cpus
 ```
 
-*Note:* in case sourcing .env file does not suffice, manually export the linode token in your shell $(export LINODE_TOKEN=xxx)
+*Note:* in case sourcing .env file does not suffice, manually export the linode token in your shell `$(export LINODE_TOKEN=xxx)`
 ```bash
 cd bonus-01-linode-jenkins/
 source .env
@@ -213,7 +215,7 @@ terraform init
 terraform apply
 ```
 
-d. Add the output public ip of your instance creation to `install-jenkins/remote.properties` and execute the remote scp/ssh installation scripts.
+#### d. Add the output public ip of your instance creation to `install-jenkins/remote.properties` and execute the remote scp/ssh installation scripts.
 ```bash
 cd install-jenkins/
 ./remote-install-java.sh
@@ -222,7 +224,7 @@ cd install-jenkins/
 ./remote-run-jenkins-in-docker.sh
 ```
 
-e. Retrieve the initial jenkins password from the linode instance and replace the ip with your own and login and configure Jenkins to your desire.
+#### e. Retrieve the initial jenkins password from the linode instance and replace the ip with your own and login and configure Jenkins to your desire.
 
 *Note* The server is available at port your-ip:8080
 
@@ -231,6 +233,92 @@ e. Retrieve the initial jenkins password from the linode instance and replace th
 ssh jenkins-runner@172.105.75.118 \
 docker exec jenkins-dind cat /var/jenkins_home/secrets/initialAdminPassword
 ```
+
+</details>
+
+-----
+
+
+<details closed>
+<summary><b>2. Provision 1-n generic Linode VPS Debian 12 Servers with a blank slate to further configure with e.g. Ansible (remote S3 state backend)</b></summary>
+
+#### a. Setup a Linode Account and create an API TOKEN, then run script to generate `.env` file.
+```bash
+cd scripts/ && ./setup-linodes-generic.sh && cd ..
+```
+
+#### b. Create Public/Private Key pair so linode vps can add the public key to its authorized_keys
+
+#### c. Create S3 bucket to store terraform state to synchronize the state to remote storage as secure backup
+
+- Simply follow bonus step 3 to setup the s3 backend used in this project's `provider.tf` file.
+- Change bucket = "{YOUR_S3_UNIQUE_BUCKET_NAME}" in `provider.tf` that you've set in bonus project 3.
+
+#### d. Create `bonus-02-linodes-generic/terraform.tfvars` file and change any desired variables by overwriting the default values within `variables.tf`
+```bash
+my_ips               = ["62.xxx.xxx.251/32", "3.xxx.xxx.109/32"]
+public_key_content   = "ssh-ed25519 xxxxxxxxxxxxxxxxxx example.user@protonmail.com"
+private_key_location = "~/.ssh/id_ed25519"
+instance_type        = "g6-standard-1" # standard is the bigger version with 2 virtual cpus
+http_inbound_ports   = "80, 8080-8085" # default is "80, 8080"
+instance_count       = 3 # default is 1
+```
+
+*Note:* in case sourcing .env file does not suffice, manually export the linode token in your shell `$(export LINODE_TOKEN=xxx)`
+```bash
+cd bonus-02-linodes-generic/
+source .env
+terraform init
+terraform apply
+```
+
+</details>
+
+-----
+
+<details closed>
+<summary><b>3. Provision a global S3 bucket used as terraform state backend including a lock mechanism and versioning</b></summary>
+
+#### a. Create the S3 bucket to use as backend for other terraform projects.
+
+*Note:* in case sourcing .env file does not suffice, manually export the linode token in your shell `$(export LINODE_TOKEN=xxx)`
+
+*Note:* region is hardcoded to `eu-central-1`. You can change this in the .tf files.
+```bash
+cd bonus-03-s3-state-backend/
+source .env
+terraform init
+terraform apply
+```
+
+#### b. Change the globally unique bucket name to your own in `bonus-03-s3-state-backend/terraform.tfvars`
+```bash
+unique_bucket_name = "hangrybear-tf-backend-state-bucket"
+```
+
+#### c. To use in other terraform projects, simply add the backend configuration to their provider file like so
+
+<b>IMPORTANT:</b> Each project should use a different key (folder path) in the S3 bucket.
+
+```bash
+terraform {
+  required_providers {
+    # ...
+  }
+  backend "s3" {
+    bucket = "tf-backend-state-bucket"
+    key = "{PROJECT_SPECIFIC_FOLDER}/state.tfstate"
+    region = "eu-central-1"
+    encrypt = true
+    # for locking state changes in multi-user environments
+    #dynamodb_table = "terraform-s3-backend-locking"
+  }
+}
+```
+
+#### d. To lock state in multi-user environments we can provision an Amazon DynamoDB table as a lock mechanism
+
+- Simply uncomment the `aws_dynamodb_table` resource in `main.tf` and the backend variable in your other terraform projects
 
 </details>
 

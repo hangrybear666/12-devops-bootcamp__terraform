@@ -12,17 +12,22 @@ read -p "Please provide your LINODE_API_TOKEN: " LINODE_API_TOKEN
 read -p "Please provide your desired Linode root password: " ROOT_PWD
 
 cd ..
-# create linode .env file for 1st bonus project
-touch bonus-01-linode-jenkins/.env
+#  create linode .env file  for 2nd bonus project
+touch bonus-02-linodes-generic/.env
 echo "# LINODE CONFIG
 LINODE_TOKEN="$LINODE_API_TOKEN"
 # TF VARS
 TF_VAR_root_password="$ROOT_PWD"
-# JENKINS SERVER CONFIG
-SERVICE_USER_PW=changeit
-" > bonus-01-linode-jenkins/.env
-echo "Created .env file with linode secrets in" && echo "$(pwd)/bonus-01-linode-jenkins/" && echo "--------------------------------"
-cat bonus-01-linode-jenkins/.env
+" > bonus-02-linodes-generic/.env
+echo "Created .env file with terraform secrets in" && echo "$(pwd)/bonus-02-linodes-generic/" && echo "--------------------------------"
+cat bonus-02-linodes-generic/.env
+
+touch bonus-03-s3-state-backend/.env
+echo "# LINODE CONFIG
+LINODE_TOKEN="$LINODE_API_TOKEN"
+" > bonus-03-s3-state-backend/.env
+echo "Created .env file with terraform secrets in" && echo "$(pwd)/bonus-03-s3-state-backend/" && echo "--------------------------------"
+cat bonus-03-s3-state-backend/.env
 
 export LINODE_TOKEN=$LINODE_API_TOKEN
 export TF_VAR_root_password=$ROOT_PWD
