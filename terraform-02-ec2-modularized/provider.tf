@@ -5,4 +5,10 @@ terraform {
       version = "~> 5.0"
     }
   }
+  backend "s3" {
+    bucket = "hangrybear-tf-backend-state-bucket"
+    key = "ec2-modularized/state.tfstate"
+    region = "eu-central-1"
+    encrypt = true
+  }
 }

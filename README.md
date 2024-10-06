@@ -4,7 +4,7 @@ Collection of Terraform configurations & modules for EC2 provisioning, EKS clust
 
 <b><u>The course examples are:</u></b>
 1. Provision an EC2 instance with VPC, Internet Gateway, Route Table, Security Group, Subnet and initialization bash script
-2. (Modularized) Provision 1-n EC2 instances with VPC, Internet Gateway, Route Table, Security Group, Subnet and initialization bash script
+2. (Modularized) Provision 1-n EC2 instances with VPC, Internet Gateway, Route Table, Security Group, Subnet & init script (remote S3 state backend)
 3. Provide an EKS cluster /w 3 Nodes in a VPC with private & public subnets using predefined AWS EKS modules
 4. CI-CD Terraform Integration provisioning an EC2 instance as deployment server & deploying payload in declarative Jenkins pipeline
 
@@ -67,7 +67,7 @@ terraform apply
 -----
 
 <details closed>
-<summary><b>2. (Modularized) Provision 1-n EC2 instances with VPC, Internet Gateway, Route Table, Security Group, Subnet and initialization bash script</b></summary>
+<summary><b>2. (Modularized) Provision 1-n EC2 instances with VPC, Internet Gateway, Route Table, Security Group, Subnet & init script (remote S3 state backend)</b></summary>
 
 #### a. Associate SSH Key to Instance
 Create Public/Private Key pair so ec2-instance can add the public key to its ssh_config or use an existing key pair.
@@ -81,6 +81,12 @@ private_key_location = "~/.ssh/id_ed25519"
 instance_count       = 2
 ```
 
+#### c. Create S3 bucket to store terraform state to synchronize the state to remote storage as secure backup
+
+- Simply follow bonus step 3 to setup the s3 backend used in this project's `provider.tf` file (only required once for all states).
+- Change bucket = "{YOUR_S3_UNIQUE_BUCKET_NAME}" in `provider.tf` that you've set in bonus project 3.
+
+#### d. Execute terraform configs
 ```bash
 # source environment variables, especially AWS access keys
 cd terraform-02-ec2-modularized/
@@ -92,7 +98,6 @@ terraform apply
 </details>
 
 -----
-
 
 <details closed>
 <summary><b>3. Provide an EKS cluster /w 3 Nodes in a VPC with private & public subnets using predefined AWS EKS modules</b></summary>
@@ -251,7 +256,7 @@ cd scripts/ && ./setup-linodes-generic.sh && cd ..
 
 #### c. Create S3 bucket to store terraform state to synchronize the state to remote storage as secure backup
 
-- Simply follow bonus step 3 to setup the s3 backend used in this project's `provider.tf` file.
+- Simply follow bonus step 3 to setup the s3 backend used in this project's `provider.tf` file (only required once for all states).
 - Change bucket = "{YOUR_S3_UNIQUE_BUCKET_NAME}" in `provider.tf` that you've set in bonus project 3.
 
 #### d. Create `bonus-02-linodes-generic/terraform.tfvars` file and change any desired variables by overwriting the default values within `variables.tf`
