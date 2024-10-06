@@ -62,6 +62,7 @@ resource "aws_key_pair" "ssh-key" {
 resource "aws_instance" "tf-test-server" {
   ami = data.aws_ami.debian-12-image.id
   instance_type = var.instance_type
+  count = var.instance_count
 
   subnet_id = var.subnet_id
   vpc_security_group_ids = [aws_default_security_group.default-sg.id]

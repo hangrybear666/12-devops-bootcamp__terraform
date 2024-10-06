@@ -7,4 +7,4 @@ variable "avail_zone" {}
 variable "subnet_id" {}
 variable "private_key_location" {}
 variable "aws_vpc" {}
-
+variable "instance_count" {}

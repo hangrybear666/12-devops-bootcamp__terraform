@@ -4,7 +4,7 @@ Collection of Terraform configurations & modules for EC2 provisioning, EKS clust
 
 <b><u>The course examples are:</u></b>
 1. Provision an EC2 instance with VPC, Internet Gateway, Route Table, Security Group, Subnet and initialization bash script
-2. (Modularized) Provision an EC2 instance with VPC, Internet Gateway, Route Table, Security Group, Subnet and initialization bash script
+2. (Modularized) Provision 1-n EC2 instances with VPC, Internet Gateway, Route Table, Security Group, Subnet and initialization bash script
 3. Provide an EKS cluster /w 3 Nodes in a VPC with private & public subnets using predefined AWS EKS modules
 4. CI-CD Terraform Integration provisioning an EC2 instance as deployment server & deploying payload in declarative Jenkins pipeline
 
@@ -65,7 +65,7 @@ terraform apply
 -----
 
 <details closed>
-<summary><b>2. (Modularized) Provision an EC2 instance with VPC, Internet Gateway, Route Table, Security Group, Subnet and initialization bash script</b></summary>
+<summary><b>2. (Modularized) Provision 1-n EC2 instances with VPC, Internet Gateway, Route Table, Security Group, Subnet and initialization bash script</b></summary>
 
 #### a. Associate SSH Key to Instance
 Create Public/Private Key pair so ec2-instance can add the public key to its ssh_config or use an existing key pair.
@@ -76,6 +76,7 @@ Create `terraform-02-ec2-modularized/terraform.tfvars` file and change any desir
 my_ips               = ["62.xxx.xxx.251/32", "3.xxx.xxx.109/32"]
 public_key_location  = "~/.ssh/id_ed25519.pub"
 private_key_location = "~/.ssh/id_ed25519"
+instance_count       = 2
 ```
 
 ```bash

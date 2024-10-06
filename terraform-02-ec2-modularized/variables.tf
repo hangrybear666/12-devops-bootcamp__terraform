@@ -33,7 +33,11 @@ variable "instance_type" {
   type        = string
   default     = "t2.micro"
 }
-
+variable "instance_count" {
+  description = "The EC2 instances you desire"
+  type        = number
+  default     = 3
+}
 variable "public_key_location" {
   description = "Path to your public SSH key"
   type        = string
