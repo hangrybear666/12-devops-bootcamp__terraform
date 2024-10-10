@@ -37,6 +37,10 @@ scaffold the .env files with the following script and fill in your own details.
 cd scripts/ && ./setup-env-vars.sh
 ```
 
+### 4. Install AWS CLI on your development machine
+
+Follow the steps described in https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html
+
 ## Usage (course examples)
 
 <details closed>
