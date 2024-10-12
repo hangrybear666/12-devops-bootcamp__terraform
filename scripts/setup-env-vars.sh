@@ -40,7 +40,11 @@ echo "Created .env file with terraform secrets in" && echo "$(pwd)/terraform-03-
 # copy terraform .env file for CI CD Jenkins Integration
 cp terraform-01-ec2/.env terraform-04-ci-cd-jenkins-provisioning/.env
 echo "Created .env file with terraform secrets in" && echo "$(pwd)/terraform-04-ci-cd-jenkins-provisioning/" && echo "--------------------------------"
-cat terraform-04-ci-cd-jenkins-provisioning/.env
+
+# copy terraform .env file for CI CD Jenkins Integration
+cp terraform-01-ec2/.env terraform-05-ec2-modularized-ansible-provisioner/.env
+echo "Created .env file with terraform secrets in" && echo "$(pwd)/terraform-05-ec2-modularized-ansible-provisioner/" && echo "--------------------------------"
+cat terraform-05-ec2-modularized-ansible-provisioner/.env
 
 
 #create ec2 .env file deployed on remote instance
@@ -57,7 +61,7 @@ AWS_OUTPUT_FORMAT=$AWS_OUTPUT_FORMAT
 " > terraform-01-ec2/payload/.env
 echo "Created .env file with ec2 secrets in" && echo "$(pwd)/terraform-01-ec2/payload/" && echo "--------------------------------"
 
-#create ec2 .env file deployed on MODULARIZED remote instance
+#copy ec2 .env file deployed on MODULARIZED remote instance
 cp terraform-01-ec2/payload/.env terraform-02-ec2-modularized/payload/.env
 echo "Created .env file with ec2 secrets in" && echo "$(pwd)/terraform-02-ec2-modularized/payload/" && echo "--------------------------------"
 cat terraform-02-ec2-modularized/payload/.env

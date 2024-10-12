@@ -1,5 +1,5 @@
 # 12-devops-bootcamp__terraform
-Collection of Terraform configurations & modules for EC2 provisioning, EKS cluster setup, CI/CD integration with Jenkins & Linode VPS provisioning with Docker-in-Docker Jenkins. 
+Terraform configs & modules for EC2 provisioning, EKS cluster setup, Ansible Provisioner, CI/CD with Jenkins & Linode VPS provisioning with Jenkins(dind).
 
 
 <b><u>The course examples are:</u></b>
@@ -7,6 +7,7 @@ Collection of Terraform configurations & modules for EC2 provisioning, EKS clust
 2. (Modularized) Provision 1-n EC2 instances with VPC, Internet Gateway, Route Table, Security Group, Subnet & init script (remote S3 state backend)
 3. Provide an EKS cluster /w 3 Nodes in a VPC with private & public subnets using predefined AWS EKS modules
 4. CI-CD Terraform Integration provisioning an EC2 instance as deployment server & deploying payload in declarative Jenkins pipeline
+5. Ansible Handover via provisioner: Provision 1 modularized EC2 instance with VPC, Internet Gateway, Route Table, Security Group, Subnet & init script (remote S3 state backend)
 
 <b><u>The bonus projects are:</u></b>
 1. Provision a Linode VPS Server with Storage and Ingress to act as a docker in docker (dind) Jenkins Server for terraform CI/CD integration
@@ -192,6 +193,46 @@ my_ip               = "xxx.xxx.xxx.xxx/32"
 jenkins_ip           = "xxx.xxx.xxx.xxx/32"
 ssh_key_name         = "tf-ci-cd-test"
 ```
+</details>
+
+-----
+
+<details closed>
+<summary><b>5. Ansible Handover via provisioner: Provision 1 modularized EC2 instance with VPC, Internet Gateway, Route Table, Security Group, Subnet & init script (remote S3 state backend)</b></summary>
+
+This project installs docker and python dependencies on the EC2 machine and runs a fullstack docker compose application /w AWS ECR image after terraform calls the provisioner.
+
+#### a. Associate SSH Key to Instance
+Create Public/Private Key pair so ec2-instance can add the public key to its ssh_config or use an existing key pair.
+
+#### b. Provide custom variables
+Create `terraform-05-ec2-modularized-ansible-provisioner/terraform.tfvars` file and change any desired variables by overwriting the default values within `variables.tf`
+
+**Important:** As the ec2 instance hands over the server config & setup to Ansible after public IPv4 has been exposed, you have to provide the absolute path to the respective ansible project (Project 4 in Ansible repo).
+<u>Note:</u> Ansible script currently only supports 1 instance, as that instances public ip is hardcoded into the index.html of the deployed java-app docker image.
+
+```bash
+my_ips                 = ["62.xxx.xxx.251/32", "3.xxx.xxx.109/32"]
+public_key_location    = "~/.ssh/id_ed25519.pub"
+private_key_location   = "~/.ssh/id_ed25519"
+instance_count         = 1
+ansible_work_directory = "/home/admin/git/15-devops-bootcamp__ansible/04-ec2-deploy-docker-compose-from-terraform"
+```
+
+#### c. Create S3 bucket to store terraform state to synchronize the state to remote storage as secure backup
+
+- Simply follow bonus step 3 to setup the s3 backend used in this project's `provider.tf` file (only required once for all states).
+- Change bucket = "{YOUR_S3_UNIQUE_BUCKET_NAME}" in `provider.tf` that you've set in bonus project 3.
+
+#### d. Execute terraform configs
+```bash
+# source environment variables, especially AWS access keys
+cd terraform-05-ec2-modularized-ansible-provisioner/
+source .env
+terraform init
+terraform apply
+```
+
 </details>
 
 -----
