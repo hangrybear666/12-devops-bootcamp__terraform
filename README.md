@@ -200,7 +200,7 @@ ssh_key_name         = "tf-ci-cd-test"
 <details closed>
 <summary><b>5. Ansible Handover via provisioner: Provision 1 modularized EC2 instance with VPC, Internet Gateway, Route Table, Security Group, Subnet & init script (remote S3 state backend)</b></summary>
 
-This project installs docker and python dependencies on the EC2 machine and runs a fullstack docker compose application /w AWS ECR image after terraform calls the provisioner.
+##### Info: This project installs docker and python dependencies on the EC2 machine and runs a fullstack docker compose application /w AWS ECR image after terraform calls the provisioner.
 
 #### a. Associate SSH Key to Instance
 Create Public/Private Key pair so ec2-instance can add the public key to its ssh_config or use an existing key pair.
