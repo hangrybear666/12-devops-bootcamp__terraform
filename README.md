@@ -224,7 +224,11 @@ ansible_work_directory = "/home/admin/git/15-devops-bootcamp__ansible/04-ec2-dep
 - Simply follow bonus step 3 to setup the s3 backend used in this project's `provider.tf` file (only required once for all states).
 - Change bucket = "{YOUR_S3_UNIQUE_BUCKET_NAME}" in `provider.tf` that you've set in bonus project 3.
 
-#### d. Execute terraform configs
+#### d. Follow the setup steps in the ansible project 4 from a-c to change any of your local workspace variables
+
+- Project 4 steps a-c in https://github.com/hangrybear666/15-devops-bootcamp__ansible
+
+#### e. Execute terraform configs
 ```bash
 # source environment variables, especially AWS access keys
 cd terraform-05-ec2-modularized-ansible-provisioner/
